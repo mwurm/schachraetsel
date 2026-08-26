@@ -16,7 +16,14 @@ from lichess_puzzle_pdf.lichess import (
     puzzle_from_row,
     reconstruct_puzzle,
 )
-from lichess_puzzle_pdf.notation import san_to_german, solution_to_german
+from lichess_puzzle_pdf.notation import (
+    move_to_unicode,
+    san_to_german,
+    san_to_unicode,
+    solution_to_german,
+    solution_to_unicode,
+    solution_to_unicode_with_sides,
+)
 from lichess_puzzle_pdf.render import create_pdf, difficulty_stars, rating_metadata
 from lichess_puzzle_pdf.selection import PuzzleFilter, SelectionRequest, mixed, select_puzzles
 
@@ -272,6 +279,22 @@ def test_different_seeds_normally_pick_different_puzzles(tmp_path: Path):
 def test_german_notation():
     assert san_to_german("Nf6+") == "Sf6+"
     assert solution_to_german(("Nf6+", "Kf8", "Qh6#")) == "Sf6+ Kf8 Dh6#"
+    assert san_to_unicode("Nf6+") == "♘f6+"
+    assert solution_to_unicode(("Qf6+", "Kd7", "Qxh8", "Bb7", "Rxf8", "Rxf8", "Qxf8")) == (
+        "♕f6+ ♔d7 ♕xh8 ♗b7 ♖xf8 ♖xf8 ♕xf8"
+    )
+
+
+def test_unicode_notation_uses_side_to_move_and_pawn_symbols():
+    fork = puzzle_from_row(parse_row(FORK_ROW))
+    assert fork is not None
+    assert solution_to_unicode_with_sides(fork.starting_fen, fork.solution_moves) == (
+        "♜e1+ ♔h2 ♜xc1 ♖xc1 ♛h6+ ♔g1 ♛xc1+"
+    )
+    board = chess.Board()
+    assert move_to_unicode(board, chess.Move.from_uci("e2e4")) == "♙e4"
+    board.push(chess.Move.from_uci("e2e4"))
+    assert move_to_unicode(board, chess.Move.from_uci("d7d5")) == "♟d5"
 
 
 def test_pdf_smoke_for_mate_in_1_mate_in_2_fork_and_mixed(tmp_path: Path):

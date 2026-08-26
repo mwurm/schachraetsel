@@ -13,7 +13,7 @@ herunter.
 - Streaming-Verarbeitung der Lichess Puzzle Database mit `zstandard` und `csv`
 - Reservoir Sampling über die gesamte Datenbank für faire, reproduzierbare Auswahl
 - mehrere Rätseltypen über echte Lichess-`Themes`
-- variable Lösungslängen mit deutscher SAN-Notation
+- variable Lösungslängen mit farbiger Unicode-Figuren-Notation inklusive Bauern
 - Rating-Schwierigkeit `easy`, `medium`, `challenging`, `hard`, `veryHard`
 - mehrere Typen in einem PDF, gruppiert oder gemischt
 - vektorbasierte Brett- und Figuren-Ausgabe

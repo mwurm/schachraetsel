@@ -14,7 +14,7 @@ from reportlab.pdfgen import canvas
 from svglib.svglib import svg2rlg
 
 from .config import Difficulty, PUZZLE_TYPES
-from .notation import solution_to_german
+from .notation import solution_to_unicode_with_sides
 from .puzzle import Puzzle
 
 MM = 72 / 25.4
@@ -266,8 +266,12 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None =
         y = (255 - row * 20) * MM
         c.setFont(text_font_bold, 10)
         c.drawString(x, y, f"{i + 1}.")
-        c.setFont(text_font, 10)
-        c.drawString(x + 9 * MM, y, solution_to_german(puzzle.solution_san))
+        c.setFont(symbol_font, 10)
+        c.drawString(
+            x + 9 * MM,
+            y,
+            solution_to_unicode_with_sides(puzzle.starting_fen, puzzle.solution_moves),
+        )
     c.setFont(text_font, 5.5)
     c.setFillGray(0.35)
     c.drawString(PAGE_MARGIN, PAGE_MARGIN, "Puzzlequelle: Lichess Puzzle Database (CC0), database.lichess.org")
