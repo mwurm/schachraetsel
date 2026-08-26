@@ -311,6 +311,15 @@ def test_pdf_smoke_for_mate_in_1_mate_in_2_fork_and_mixed(tmp_path: Path):
     assert out.stat().st_size > 10_000
 
 
+def test_pdf_smoke_for_multiple_solution_pages(tmp_path: Path):
+    puzzle = puzzle_from_row(parse_row(FORK_ROW))
+    assert puzzle is not None
+    out = tmp_path / "many-solutions.pdf"
+    create_pdf([puzzle] * 20, out)
+    assert out.exists()
+    assert out.stat().st_size > 10_000
+
+
 def test_mixed_layout_is_seeded():
     puzzles = [puzzle_from_row(parse_row({**MATE_IN_1_ROW, "PuzzleId": f"m{i}"})) for i in range(6)]
     valid = [p for p in puzzles if p is not None]

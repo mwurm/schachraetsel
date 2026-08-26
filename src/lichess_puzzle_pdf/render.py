@@ -28,6 +28,12 @@ TASK_HEADING_TOP = 263 * MM
 TASK_HEADING_BOARD_GAP = 5 * MM
 TASK_ROW_GAP = 8 * MM
 COORD_FONT_SIZE = 8.25
+SOLUTION_FONT_SIZE = 12
+SOLUTION_ROWS_PER_GROUP = 3
+SOLUTION_COLUMNS = 2
+SOLUTION_GROUPS_PER_PAGE = 3
+SOLUTION_ROW_GAP = 18 * MM
+SOLUTION_GROUP_GAP = 11 * MM
 
 
 def _register_font(name: str, paths: list[Path], fallback: str) -> str:
@@ -188,6 +194,59 @@ def default_title(puzzles: list[Puzzle]) -> str:
     return "Schachtaktik"
 
 
+def _draw_solution_pages(c: canvas.Canvas, puzzles: list[Puzzle], text_font: str,
+                         text_font_bold: str, symbol_font: str) -> None:
+    width, _ = A4
+    per_solution_page = SOLUTION_ROWS_PER_GROUP * SOLUTION_COLUMNS * SOLUTION_GROUPS_PER_PAGE
+    column_x = [PAGE_MARGIN, width / 2 + 4 * MM]
+    number_gap = 10 * MM
+    first_row_y = 255 * MM
+
+    for page_start in range(0, len(puzzles), per_solution_page):
+        page_items = puzzles[page_start:page_start + per_solution_page]
+        c.setFillGray(0)
+        c.setFont(text_font_bold, 22)
+        c.drawString(PAGE_MARGIN, 281 * MM, "Lösungen")
+        c.setFont(text_font, 10)
+        c.drawString(PAGE_MARGIN, 272 * MM, "Die Lichess-Hauptvariante zu jeder Aufgabe:")
+
+        for local, puzzle in enumerate(page_items):
+            row_in_page = local // SOLUTION_COLUMNS
+            col = local % SOLUTION_COLUMNS
+            group = row_in_page // SOLUTION_ROWS_PER_GROUP
+            row = row_in_page % SOLUTION_ROWS_PER_GROUP
+            x = column_x[col]
+            y = first_row_y - group * (
+                SOLUTION_ROWS_PER_GROUP * SOLUTION_ROW_GAP + SOLUTION_GROUP_GAP
+            ) - row * SOLUTION_ROW_GAP
+            task_no = page_start + local + 1
+
+            c.setFont(text_font_bold, SOLUTION_FONT_SIZE)
+            c.drawString(x, y, f"{task_no}.")
+            c.setFont(symbol_font, SOLUTION_FONT_SIZE)
+            c.drawString(
+                x + number_gap,
+                y,
+                solution_to_unicode_with_sides(puzzle.starting_fen, puzzle.solution_moves),
+            )
+
+        groups_on_page = (len(page_items) + SOLUTION_ROWS_PER_GROUP * SOLUTION_COLUMNS - 1) // (
+            SOLUTION_ROWS_PER_GROUP * SOLUTION_COLUMNS
+        )
+        c.setStrokeGray(0.7)
+        c.setLineWidth(0.45)
+        for group in range(groups_on_page - 1):
+            y = first_row_y - (group + 1) * SOLUTION_ROWS_PER_GROUP * SOLUTION_ROW_GAP
+            y -= group * SOLUTION_GROUP_GAP
+            y += (SOLUTION_ROW_GAP - SOLUTION_GROUP_GAP) / 2
+            c.line(PAGE_MARGIN, y, width - PAGE_MARGIN, y)
+
+        c.setFont(text_font, 5.5)
+        c.setFillGray(0.35)
+        c.drawString(PAGE_MARGIN, PAGE_MARGIN, "Puzzlequelle: Lichess Puzzle Database (CC0), database.lichess.org")
+        c.showPage()
+
+
 def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None = None,
                gray: float = 0.92, piece_scale: float = 0.86,
                piece_lift: float = 0.5, show_move_count: bool = True) -> Path:
@@ -253,27 +312,6 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None =
         c.drawCentredString(width / 2, PAGE_MARGIN, f"Seite {page_start // per_page + 1}")
         c.showPage()
 
-    c.setFillGray(0)
-    c.setFont(text_font_bold, 22)
-    c.drawString(PAGE_MARGIN, 281 * MM, "Lösungen")
-    c.setFont(text_font, 10)
-    c.drawString(PAGE_MARGIN, 272 * MM, "Die Lichess-Hauptvariante zu jeder Aufgabe:")
-    rows = 10
-    for i, puzzle in enumerate(puzzles):
-        col = i // rows
-        row = i % rows
-        x = PAGE_MARGIN + col * 63 * MM
-        y = (255 - row * 20) * MM
-        c.setFont(text_font_bold, 10)
-        c.drawString(x, y, f"{i + 1}.")
-        c.setFont(symbol_font, 10)
-        c.drawString(
-            x + 9 * MM,
-            y,
-            solution_to_unicode_with_sides(puzzle.starting_fen, puzzle.solution_moves),
-        )
-    c.setFont(text_font, 5.5)
-    c.setFillGray(0.35)
-    c.drawString(PAGE_MARGIN, PAGE_MARGIN, "Puzzlequelle: Lichess Puzzle Database (CC0), database.lichess.org")
+    _draw_solution_pages(c, puzzles, text_font, text_font_bold, symbol_font)
     c.save()
     return output

@@ -154,6 +154,9 @@ Typ und Schwierigkeit sind unabhängig: Ein `fork` kann leicht, mittel oder
 sehr schwer sein. Im PDF steht das Lichess-Rating in Klammern hinter den
 Sternen, standardmäßig gefolgt von der Anzahl der nötigen Lösungszüge.
 
+Die Lösungsseiten zeigen zwei Lösungen pro Zeile. Nach jeweils drei Zeilen
+trennt eine Linie die nächste Sechsergruppe passend zu einer Aufgabenseite.
+
 ## Lichess-Rekonstruktion
 
 Das `FEN` aus der CSV ist nicht direkt die Diagrammstellung. Für jedes Puzzle
