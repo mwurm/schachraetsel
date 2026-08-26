@@ -1,7 +1,7 @@
 .PHONY: pdf test
 
 pdf:
-	PYTHONPATH=src python -m matt_in_1_pdf.cli -o examples/matt_in_1_beispiel.pdf
+	PYTHONPATH=src python -m lichess_puzzle_pdf --output examples/preview.pdf
 
 test:
-	PYTHONPATH=src pytest -q
+	PYTHONPATH=src python -m pytest -q

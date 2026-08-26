@@ -1,17 +1,13 @@
 # Third-party notices
 
-## Cburnett chess-piece artwork
+## Lichess Puzzle Database
 
-The SVG chess pieces in `src/matt_in_1_pdf/assets/cburnett/` use the Cburnett
-chess-piece design by **Colin M.L. Burnett (User:Cburnett)**.
+Puzzles are read from the official **Lichess Puzzle Database** export at
+`database.lichess.org`.
 
-The artwork is distributed separately from the MIT-licensed Python source code
-under **Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA 3.0)**.
+The Lichess Puzzle Database is distributed under **Creative Commons CC0**.
 
-- Creator: Colin M.L. Burnett
-- Source family: Wikimedia Commons, SVG chess pieces
-- License: https://creativecommons.org/licenses/by-sa/3.0/
-- Overview: https://commons.wikimedia.org/wiki/Template:SVG_chess_pieces
+## python-chess SVG Pieces
 
-The SVGs bundled here were prepared as standalone vector assets for this PDF
-generator. Attribution does not imply endorsement by the creator or Wikimedia.
+The PDF renderer uses vector chess-piece SVGs provided by the `python-chess`
+package. See the installed package metadata for its license terms.

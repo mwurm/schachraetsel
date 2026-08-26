@@ -7,4 +7,3 @@ venv/
 dist/
 build/
 *.pdf
-!examples/matt_in_1_beispiel.pdf

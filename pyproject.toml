@@ -3,26 +3,25 @@ requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "matt-in-1-pdf-generator"
-version = "0.1.0"
-description = "Erzeugt druckbare deutsche Matt-in-1-Schachraetsel als A4-PDF."
+name = "lichess-puzzle-pdf"
+version = "0.2.0"
+description = "Erzeugt druckbare deutsche Schachraetsel aus der Lichess Puzzle Database als A4-PDF."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Matthias" }]
 dependencies = [
+  "chess>=1.11",
   "reportlab>=4.0",
   "svglib>=1.5",
+  "zstandard>=0.23",
 ]
 
 [project.scripts]
-matt-in-1-pdf = "matt_in_1_pdf.cli:main"
+lichess-puzzle-pdf = "lichess_puzzle_pdf.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
-
-[tool.setuptools.package-data]
-"matt_in_1_pdf" = ["assets/cburnett/*.svg"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
