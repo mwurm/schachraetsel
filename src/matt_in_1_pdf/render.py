@@ -5,6 +5,8 @@ from importlib.resources import files
 from pathlib import Path
 
 from reportlab.lib.pagesizes import A4
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfgen import canvas
 from reportlab.graphics import renderPDF
 from svglib.svglib import svg2rlg
@@ -12,6 +14,15 @@ from svglib.svglib import svg2rlg
 from .chess import Puzzle, Square, square_name
 
 MM = 72 / 25.4
+TEXT_FONT = "ComicSans"
+TEXT_FONT_BOLD = "ComicSans-Bold"
+SYMBOL_FONT = "ChessSymbol"
+PAGE_MARGIN = 10 * MM
+BOARD_MARGIN_LEFT = 13 * MM
+BOARD_SIZE = 73 * MM
+TASK_HEADING_TOP = 263 * MM
+TASK_HEADING_BOARD_GAP = 5 * MM
+TASK_ROW_GAP = 8 * MM
 
 
 PIECE_ASSET = {
@@ -22,6 +33,71 @@ PIECE_ASSET = {
     ("black", "Q"): "bQ.svg",
     ("black", "R"): "bR.svg",
 }
+
+
+def _register_font(name: str, paths: list[Path], fallback: str) -> str:
+    for path in paths:
+        if path.exists():
+            if name not in pdfmetrics.getRegisteredFontNames():
+                pdfmetrics.registerFont(TTFont(name, str(path)))
+            return name
+    return fallback
+
+
+def _register_text_fonts() -> tuple[str, str]:
+    regular = _register_font(
+        TEXT_FONT,
+        [
+            Path("/mnt/c/Windows/Fonts/comic.ttf"),
+            Path("C:/Windows/Fonts/comic.ttf"),
+        ],
+        "Helvetica",
+    )
+    bold = _register_font(
+        TEXT_FONT_BOLD,
+        [
+            Path("/mnt/c/Windows/Fonts/comicbd.ttf"),
+            Path("C:/Windows/Fonts/comicbd.ttf"),
+        ],
+        "Helvetica-Bold",
+    )
+    return regular, bold
+
+
+def _register_symbol_font() -> str:
+    return _register_font(
+        SYMBOL_FONT,
+        [
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
+            Path("/usr/local/share/fonts/dejavu/DejaVuSans.ttf"),
+            Path("/mnt/c/Windows/Fonts/seguisym.ttf"),
+            Path("C:/Windows/Fonts/seguisym.ttf"),
+        ],
+        "Helvetica",
+    )
+
+
+def _turn_symbol(attacker: str) -> str:
+    return "♔" if attacker == "white" else "♚"
+
+
+def _task_heading(task_no: int, attacker: str) -> str:
+    return f"Nr. {task_no} {_turn_symbol(attacker)} - Matt in 1"
+
+
+def _draw_task_heading(c: canvas.Canvas, x: float, y: float, task_no: int,
+                       attacker: str, text_font: str, symbol_font: str) -> None:
+    prefix = f"Nr. {task_no} "
+    suffix = " - Matt in 1"
+    size = 10
+    c.setFont(text_font, size)
+    c.drawString(x, y, prefix)
+    symbol_x = x + c.stringWidth(prefix, text_font, size)
+    c.setFont(symbol_font, size)
+    c.drawString(symbol_x, y, _turn_symbol(attacker))
+    suffix_x = symbol_x + c.stringWidth(_turn_symbol(attacker), symbol_font, size)
+    c.setFont(text_font, size)
+    c.drawString(suffix_x, y, suffix)
 
 
 class PieceSet:
@@ -51,7 +127,8 @@ def _board_square_xy(square: Square, x: float, y: float, field: float, flipped: 
 
 
 def _draw_board(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float, board_size: float,
-                gray: float, piece_scale: float, piece_lift: float, pieces: PieceSet) -> None:
+                gray: float, piece_scale: float, piece_lift: float, pieces: PieceSet,
+                text_font: str) -> None:
     field = board_size / 8
     flipped = puzzle.position.attacker == "black"
 
@@ -86,13 +163,15 @@ def _draw_board(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float, board_size
 
     # Coordinates.
     c.setFillGray(0.35)
-    c.setFont("Helvetica", 5.5)
+    c.setFont(text_font, 8.25)
     file_labels = "hgfedcba" if flipped else "abcdefgh"
     rank_labels = "12345678" if flipped else "87654321"
     for i, label in enumerate(file_labels):
-        c.drawCentredString(x + (i + 0.5) * field, y - 4.2, label)
+        c.drawCentredString(x + (i + 0.5) * field, y - 8.0, label)
+        c.drawCentredString(x + (i + 0.5) * field, y + board_size + 2.0, label)
     for i, label in enumerate(rank_labels):
         c.drawRightString(x - 3.0, y + board_size - (i + 0.64) * field, label)
+        c.drawString(x + board_size + 3.0, y + board_size - (i + 0.64) * field, label)
 
 
 def create_pdf(puzzles: list[Puzzle], output: str | Path, *, gray: float = 0.92,
@@ -102,19 +181,25 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, gray: float = 0.92,
     c = canvas.Canvas(str(output), pagesize=A4)
     width, height = A4
     pieces = PieceSet()
+    text_font, text_font_bold = _register_text_fonts()
+    symbol_font = _register_symbol_font()
 
     per_page = 6
-    board = 54 * MM
-    x_positions = [22 * MM, 120 * MM]
-    y_positions = [194 * MM, 111 * MM, 28 * MM]
+    board = BOARD_SIZE
+    x_positions = [BOARD_MARGIN_LEFT, width - PAGE_MARGIN - board]
+    heading_y_positions = [
+        TASK_HEADING_TOP - row * (board + TASK_HEADING_BOARD_GAP + TASK_ROW_GAP)
+        for row in range(3)
+    ]
+    y_positions = [heading_y - TASK_HEADING_BOARD_GAP - board for heading_y in heading_y_positions]
 
     for page_start in range(0, len(puzzles), per_page):
         page_items = puzzles[page_start:page_start + per_page]
         if page_start == 0:
-            c.setFont("Helvetica-Bold", 22)
-            c.drawString(25 * MM, 281 * MM, "Matt in 1")
-            c.setFont("Helvetica", 11)
-            c.drawString(25 * MM, 272.5 * MM, "Schachrätsel für Kinder - finde den einzigen Mattzug!")
+            c.setFont(text_font_bold, 22)
+            c.drawString(PAGE_MARGIN, 281 * MM, "Matt in 1")
+            c.setFont(text_font, 11)
+            c.drawString(PAGE_MARGIN, 272.5 * MM, "Finde den einzigen Mattzug!")
 
         for local, puzzle in enumerate(page_items):
             col = local % 2
@@ -122,43 +207,36 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, gray: float = 0.92,
             x = x_positions[col]
             y = y_positions[row]
             task_no = page_start + local + 1
-            heading_y = y + board + 10.5 * MM
+            heading_y = heading_y_positions[row]
+            heading_x = PAGE_MARGIN if col == 0 else x - 3 * MM
             c.setFillGray(0)
-            c.setFont("Helvetica-Bold", 12)
-            c.drawString(x - 10 * MM, heading_y, f"Aufgabe {task_no}")
-            c.setFont("Helvetica", 10)
-            side = "Weiß" if puzzle.position.attacker == "white" else "Schwarz"
-            c.drawString(x - 10 * MM, heading_y - 6.2 * MM, f"{side} am Zug - Matt in 1")
-            _draw_board(c, puzzle, x, y, board, gray, piece_scale, piece_lift, pieces)
-            c.setFillGray(0.35)
-            c.setFont("Helvetica", 9)
-            c.drawString(x - 10 * MM, y - 8.0 * MM, "Mattzug:")
-            c.line(x + 10 * MM, y - 8.7 * MM, x + 54 * MM, y - 8.7 * MM)
+            _draw_task_heading(c, heading_x, heading_y, task_no, puzzle.position.attacker, text_font, symbol_font)
+            _draw_board(c, puzzle, x, y, board, gray, piece_scale, piece_lift, pieces, text_font)
 
         c.setFillGray(0.4)
-        c.setFont("Helvetica", 7)
-        c.drawCentredString(width / 2, 8 * MM, f"Seite {page_start // per_page + 1}")
+        c.setFont(text_font, 7)
+        c.drawCentredString(width / 2, PAGE_MARGIN, f"Seite {page_start // per_page + 1}")
         c.showPage()
 
     # Solutions.
     c.setFillGray(0)
-    c.setFont("Helvetica-Bold", 22)
-    c.drawString(25 * MM, 281 * MM, "Lösungen")
-    c.setFont("Helvetica", 10)
-    c.drawString(25 * MM, 272 * MM, "Der eindeutige Mattzug zu jeder Aufgabe:")
+    c.setFont(text_font_bold, 22)
+    c.drawString(PAGE_MARGIN, 281 * MM, "Lösungen")
+    c.setFont(text_font, 10)
+    c.drawString(PAGE_MARGIN, 272 * MM, "Der eindeutige Mattzug zu jeder Aufgabe:")
     cols = 3
     rows = 10
     for i, puzzle in enumerate(puzzles):
         col = i // rows
         row = i % rows
-        x = (25 + col * 58) * MM
+        x = PAGE_MARGIN + col * 63 * MM
         y = (255 - row * 20) * MM
-        c.setFont("Helvetica-Bold", 10)
+        c.setFont(text_font_bold, 10)
         c.drawString(x, y, f"{i + 1}.")
-        c.setFont("Helvetica", 10)
+        c.setFont(text_font, 10)
         c.drawString(x + 9 * MM, y, puzzle.solution_de)
-    c.setFont("Helvetica", 5.5)
+    c.setFont(text_font, 5.5)
     c.setFillGray(0.35)
-    c.drawString(15 * MM, 8 * MM, "Schachfiguren: Cburnett-Stil von Colin M.L. Burnett, CC BY-SA 3.0; siehe THIRD_PARTY_NOTICES.md")
+    c.drawString(PAGE_MARGIN, PAGE_MARGIN, "Schachfiguren: Cburnett-Stil von Colin M.L. Burnett, CC BY-SA 3.0; siehe THIRD_PARTY_NOTICES.md")
     c.save()
     return output
