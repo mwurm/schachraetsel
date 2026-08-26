@@ -125,6 +125,12 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--gray", type=float, default=0.92)
     p.add_argument("--piece-scale", type=float, default=0.86)
     p.add_argument("--piece-lift", type=float, default=0.5)
+    p.add_argument(
+        "--move-count",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Anzahl der nötigen Lösungszüge in der Aufgabenüberschrift anzeigen",
+    )
     return p
 
 
@@ -163,6 +169,7 @@ def main() -> None:
         gray=args.gray,
         piece_scale=args.piece_scale,
         piece_lift=args.piece_lift,
+        show_move_count=args.move_count,
     )
     print(path)
 

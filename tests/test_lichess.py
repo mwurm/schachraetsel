@@ -17,7 +17,7 @@ from lichess_puzzle_pdf.lichess import (
     reconstruct_puzzle,
 )
 from lichess_puzzle_pdf.notation import san_to_german, solution_to_german
-from lichess_puzzle_pdf.render import create_pdf, difficulty_stars
+from lichess_puzzle_pdf.render import create_pdf, difficulty_stars, rating_metadata
 from lichess_puzzle_pdf.selection import PuzzleFilter, SelectionRequest, mixed, select_puzzles
 
 
@@ -162,6 +162,16 @@ def test_difficulty_stars():
     assert difficulty_stars(Difficulty.HARD) == "★★★★"
     assert difficulty_stars(Difficulty.VERY_HARD) == "★★★★★"
     assert difficulty_stars(None) == ""
+
+
+def test_rating_metadata_includes_optional_move_count():
+    mate = puzzle_from_row(parse_row(MATE_IN_1_ROW))
+    fork = puzzle_from_row(parse_row(FORK_ROW))
+    assert mate is not None
+    assert fork is not None
+    assert rating_metadata(mate) == "(740, 1 Zug)"
+    assert rating_metadata(fork) == "(1380, 7 Züge)"
+    assert rating_metadata(fork, show_move_count=False) == "(1380)"
 
 
 def test_mate_in_1_requires_exactly_one_matching_mate():

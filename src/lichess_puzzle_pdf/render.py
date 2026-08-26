@@ -100,15 +100,23 @@ def difficulty_stars(difficulty: Difficulty | None) -> str:
     }.get(difficulty, "")
 
 
+def rating_metadata(puzzle: Puzzle, *, show_move_count: bool = True) -> str:
+    if not show_move_count:
+        return f"({puzzle.rating})"
+    moves = len(puzzle.solution_moves)
+    move_label = "Zug" if moves == 1 else "Züge"
+    return f"({puzzle.rating}, {moves} {move_label})"
+
+
 def task_instruction(puzzle: Puzzle) -> str:
     return PUZZLE_TYPES[puzzle.primary_type].instruction
 
 
 def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, task_no: int,
-                       text_font: str, symbol_font: str) -> None:
+                       text_font: str, symbol_font: str, show_move_count: bool) -> None:
     board = chess.Board(puzzle.starting_fen)
     stars = difficulty_stars(puzzle.difficulty)
-    rating_label = f"({puzzle.rating})"
+    meta_label = rating_metadata(puzzle, show_move_count=show_move_count)
     prefix = f"Nr. {task_no} "
     middle = f" - {task_instruction(puzzle)}"
     size = 10
@@ -127,7 +135,7 @@ def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, tas
         c.drawString(meta_x, y, stars)
         meta_x += c.stringWidth(stars + " ", symbol_font, size)
     c.setFont(text_font, size)
-    c.drawString(meta_x, y, rating_label)
+    c.drawString(meta_x, y, meta_label)
 
 
 def _board_square_xy(square: chess.Square, x: float, y: float, field: float, flipped: bool) -> tuple[float, float]:
@@ -182,7 +190,7 @@ def default_title(puzzles: list[Puzzle]) -> str:
 
 def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None = None,
                gray: float = 0.92, piece_scale: float = 0.86,
-               piece_lift: float = 0.5) -> Path:
+               piece_lift: float = 0.5, show_move_count: bool = True) -> Path:
     output = Path(output)
     output.parent.mkdir(parents=True, exist_ok=True)
     c = canvas.Canvas(str(output), pagesize=A4)
@@ -217,7 +225,16 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None =
             task_no = page_start + local + 1
             heading_x = PAGE_MARGIN if col == 0 else x - 3 * MM
             c.setFillGray(0)
-            _draw_task_heading(c, heading_x, heading_y_positions[row], puzzle, task_no, text_font, symbol_font)
+            _draw_task_heading(
+                c,
+                heading_x,
+                heading_y_positions[row],
+                puzzle,
+                task_no,
+                text_font,
+                symbol_font,
+                show_move_count,
+            )
             _draw_board(
                 c,
                 chess.Board(puzzle.starting_fen),

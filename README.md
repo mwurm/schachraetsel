@@ -92,6 +92,13 @@ lichess-puzzle-pdf \
   --output forks.pdf
 ```
 
+Die Zuganzahl in der Aufgabenüberschrift ist standardmäßig aktiv und kann
+abgeschaltet werden:
+
+```bash
+lichess-puzzle-pdf --type fork --count 30 --no-move-count --output forks.pdf
+```
+
 Sekundäre Themes filtern:
 
 ```bash
@@ -145,7 +152,7 @@ Die Schwierigkeit wird nur aus dem Lichess-Rating abgeleitet:
 
 Typ und Schwierigkeit sind unabhängig: Ein `fork` kann leicht, mittel oder
 sehr schwer sein. Im PDF steht das Lichess-Rating in Klammern hinter den
-Sternen.
+Sternen, standardmäßig gefolgt von der Anzahl der nötigen Lösungszüge.
 
 ## Lichess-Rekonstruktion
 
