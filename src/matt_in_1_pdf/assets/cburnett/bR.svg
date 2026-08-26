@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!-- Created by MetaPost 2.10 on 2026.08.26:0901 -->
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="33.750000" height="33.750000" viewBox="0 0 33.750000 33.750000">
+<!-- Original BoundingBox: 0.000000 0.000000 33.750000 33.750000 -->
+  <path d="M6.750000 29.250000L27.000000 29.250000L27.000000 27.000000L6.750000 27.000000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M9.375000 24.000000L10.500000 22.125000L23.250000 22.125000L24.375000 24.000000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M9.000000 27.000000L9.000000 24.000000L24.750000 24.000000L24.750000 27.000000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M9.000000 27.000000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M6.750000 29.250000L27.000000 29.250000L27.000000 27.000000L6.750000 27.000000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M9.375000 24.000000L10.500000 22.125000L23.250000 22.125000L24.375000 24.000000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M9.000000 27.000000L9.000000 24.000000L24.750000 24.000000L24.750000 27.000000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M9.000000 27.000000l0 0" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M10.500000 12.375000L23.250000 12.375000L23.250000 22.125000L10.500000 22.125000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M10.500000 12.375000L23.250000 12.375000L23.250000 22.125000L10.500000 22.125000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M10.500000 12.375000L8.250000 10.500000L25.500000 10.500000L23.250000 12.375000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M8.250000 10.500000L8.250000 6.750000L11.250000 6.750000L11.250000 8.250000L15.000000 8.250000L15.000000 6.750000L18.750000 6.750000L18.750000 8.250000L22.500000 8.250000L22.500000 6.750000L25.500000 6.750000L25.500000 10.500000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M8.250000 10.500000Z" style="fill: rgb(0.000000%,0.000000%,0.000000%);stroke: none;"></path>
+  <path d="M10.500000 12.375000L8.250000 10.500000L25.500000 10.500000L23.250000 12.375000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M8.250000 10.500000L8.250000 6.750000L11.250000 6.750000L11.250000 8.250000L15.000000 8.250000L15.000000 6.750000L18.750000 6.750000L18.750000 8.250000L22.500000 8.250000L22.500000 6.750000L25.500000 6.750000L25.500000 10.500000Z" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M8.250000 10.500000l0 0" style="stroke:rgb(0.000000%,0.000000%,0.000000%); stroke-width: 1.125000;stroke-linejoin: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M9.000000 26.625000L24.750000 26.625000" style="stroke:rgb(92.549133%,92.549133%,92.549133%); stroke-width: 0.750000;stroke-linecap: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M9.750000 23.625000L24.000000 23.625000" style="stroke:rgb(92.549133%,92.549133%,92.549133%); stroke-width: 0.750000;stroke-linecap: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M10.500000 22.125000L23.250000 22.125000" style="stroke:rgb(92.549133%,92.549133%,92.549133%); stroke-width: 0.750000;stroke-linecap: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M10.500000 12.375000L23.250000 12.375000" style="stroke:rgb(92.549133%,92.549133%,92.549133%); stroke-width: 0.750000;stroke-linecap: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+  <path d="M8.250000 10.500000L25.500000 10.500000" style="stroke:rgb(92.549133%,92.549133%,92.549133%); stroke-width: 0.750000;stroke-linecap: round;stroke-miterlimit: 10.000000;fill: none;"></path>
+</svg>
