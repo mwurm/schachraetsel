@@ -94,7 +94,9 @@ def difficulty_stars(difficulty: Difficulty | None) -> str:
     return {
         Difficulty.EASY: "★",
         Difficulty.MEDIUM: "★★",
-        Difficulty.HARD: "★★★",
+        Difficulty.CHALLENGING: "★★★",
+        Difficulty.HARD: "★★★★",
+        Difficulty.VERY_HARD: "★★★★★",
     }.get(difficulty, "")
 
 
@@ -106,6 +108,7 @@ def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, tas
                        text_font: str, symbol_font: str) -> None:
     board = chess.Board(puzzle.starting_fen)
     stars = difficulty_stars(puzzle.difficulty)
+    rating_label = f"({puzzle.rating})"
     prefix = f"Nr. {task_no} "
     middle = f" - {task_instruction(puzzle)}"
     size = 10
@@ -118,10 +121,13 @@ def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, tas
     suffix_x = symbol_x + c.stringWidth(symbol, symbol_font, size)
     c.setFont(text_font, size)
     c.drawString(suffix_x, y, middle)
+    meta_x = suffix_x + c.stringWidth(middle + " ", text_font, size)
     if stars:
-        stars_x = suffix_x + c.stringWidth(middle + " ", text_font, size)
         c.setFont(symbol_font, size)
-        c.drawString(stars_x, y, stars)
+        c.drawString(meta_x, y, stars)
+        meta_x += c.stringWidth(stars + " ", symbol_font, size)
+    c.setFont(text_font, size)
+    c.drawString(meta_x, y, rating_label)
 
 
 def _board_square_xy(square: chess.Square, x: float, y: float, field: float, flipped: bool) -> tuple[float, float]:

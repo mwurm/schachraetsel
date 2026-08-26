@@ -14,7 +14,7 @@ herunter.
 - Reservoir Sampling über die gesamte Datenbank für faire, reproduzierbare Auswahl
 - mehrere Rätseltypen über echte Lichess-`Themes`
 - variable Lösungslängen mit deutscher SAN-Notation
-- Rating-Schwierigkeit `easy`, `medium`, `hard`
+- Rating-Schwierigkeit `easy`, `medium`, `challenging`, `hard`, `veryHard`
 - mehrere Typen in einem PDF, gruppiert oder gemischt
 - vektorbasierte Brett- und Figuren-Ausgabe
 - tonersparende Bretter mit hellgrauen Feldern
@@ -86,7 +86,9 @@ lichess-puzzle-pdf \
   --type fork \
   --easy 10 \
   --medium 10 \
+  --challenging 10 \
   --hard 10 \
+  --very-hard 10 \
   --output forks.pdf
 ```
 
@@ -134,13 +136,16 @@ offiziellen Lichess-Code und der Lichess Puzzle Database.
 Die Schwierigkeit wird nur aus dem Lichess-Rating abgeleitet:
 
 ```text
-easy:   600-899
-medium: 900-1199
-hard:   1200-1499
+★        easy:        600-899
+★★       medium:      900-1199
+★★★      challenging: 1200-1599
+★★★★     hard:        1600-1999
+★★★★★    veryHard:    2000+
 ```
 
 Typ und Schwierigkeit sind unabhängig: Ein `fork` kann leicht, mittel oder
-schwer sein.
+sehr schwer sein. Im PDF steht das Lichess-Rating in Klammern hinter den
+Sternen.
 
 ## Lichess-Rekonstruktion
 

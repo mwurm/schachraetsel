@@ -31,15 +31,19 @@ class PuzzleType(str, Enum):
 class Difficulty(str, Enum):
     EASY = "easy"
     MEDIUM = "medium"
+    CHALLENGING = "challenging"
     HARD = "hard"
+    VERY_HARD = "veryHard"
 
 
 @dataclass(frozen=True)
 class RatingRange:
     minimum: int
-    maximum: int
+    maximum: int | None
 
     def contains(self, rating: int) -> bool:
+        if self.maximum is None:
+            return rating >= self.minimum
         return self.minimum <= rating <= self.maximum
 
 
@@ -54,7 +58,9 @@ class PuzzleTypeConfig:
 DIFFICULTY_RANGES: dict[Difficulty, RatingRange] = {
     Difficulty.EASY: RatingRange(600, 899),
     Difficulty.MEDIUM: RatingRange(900, 1199),
-    Difficulty.HARD: RatingRange(1200, 1499),
+    Difficulty.CHALLENGING: RatingRange(1200, 1599),
+    Difficulty.HARD: RatingRange(1600, 1999),
+    Difficulty.VERY_HARD: RatingRange(2000, None),
 }
 
 

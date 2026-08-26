@@ -67,7 +67,9 @@ def build_requests(args: argparse.Namespace) -> list[SelectionRequest]:
     difficulty_counts = {
         Difficulty.EASY: args.easy,
         Difficulty.MEDIUM: args.medium,
+        Difficulty.CHALLENGING: args.challenging,
         Difficulty.HARD: args.hard,
+        Difficulty.VERY_HARD: args.very_hard,
     }
     if any(count is not None for count in difficulty_counts.values()):
         return [
@@ -102,7 +104,9 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--puzzles", action="append", nargs="+", help="Verteilung, z.B. mateIn1=10 fork=10")
     p.add_argument("--easy", type=int)
     p.add_argument("--medium", type=int)
+    p.add_argument("--challenging", type=int)
     p.add_argument("--hard", type=int)
+    p.add_argument("--very-hard", dest="very_hard", type=int)
     p.add_argument("--layout", choices=["grouped", "mixed"], default="grouped")
     p.add_argument("--title")
     p.add_argument("--seed", type=int, default=20260826, help="Seed für reproduzierbare Auswahl")

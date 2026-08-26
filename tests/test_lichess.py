@@ -17,7 +17,7 @@ from lichess_puzzle_pdf.lichess import (
     reconstruct_puzzle,
 )
 from lichess_puzzle_pdf.notation import san_to_german, solution_to_german
-from lichess_puzzle_pdf.render import create_pdf
+from lichess_puzzle_pdf.render import create_pdf, difficulty_stars
 from lichess_puzzle_pdf.selection import PuzzleFilter, SelectionRequest, mixed, select_puzzles
 
 
@@ -139,9 +139,29 @@ def test_filter_rejects_irrelevant_row_before_reconstruction():
 
 
 def test_difficulty_ranges():
+    assert difficulty_for_rating(599) is None
     assert difficulty_for_rating(740) == Difficulty.EASY
+    assert difficulty_for_rating(899) == Difficulty.EASY
+    assert difficulty_for_rating(900) == Difficulty.MEDIUM
     assert difficulty_for_rating(998) == Difficulty.MEDIUM
-    assert difficulty_for_rating(1380) == Difficulty.HARD
+    assert difficulty_for_rating(1199) == Difficulty.MEDIUM
+    assert difficulty_for_rating(1200) == Difficulty.CHALLENGING
+    assert difficulty_for_rating(1380) == Difficulty.CHALLENGING
+    assert difficulty_for_rating(1599) == Difficulty.CHALLENGING
+    assert difficulty_for_rating(1600) == Difficulty.HARD
+    assert difficulty_for_rating(1999) == Difficulty.HARD
+    assert difficulty_for_rating(2000) == Difficulty.VERY_HARD
+    assert difficulty_for_rating(2166) == Difficulty.VERY_HARD
+    assert difficulty_for_rating(10_000) == Difficulty.VERY_HARD
+
+
+def test_difficulty_stars():
+    assert difficulty_stars(Difficulty.EASY) == "★"
+    assert difficulty_stars(Difficulty.MEDIUM) == "★★"
+    assert difficulty_stars(Difficulty.CHALLENGING) == "★★★"
+    assert difficulty_stars(Difficulty.HARD) == "★★★★"
+    assert difficulty_stars(Difficulty.VERY_HARD) == "★★★★★"
+    assert difficulty_stars(None) == ""
 
 
 def test_mate_in_1_requires_exactly_one_matching_mate():
