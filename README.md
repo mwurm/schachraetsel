@@ -13,7 +13,7 @@ herunter.
 - Streaming-Verarbeitung der Lichess Puzzle Database mit `zstandard` und `csv`
 - Reservoir Sampling über die gesamte Datenbank für faire, reproduzierbare Auswahl
 - mehrere Rätseltypen über echte Lichess-`Themes`
-- variable Lösungslängen mit farbiger Unicode-Figuren-Notation inklusive Bauern
+- variable Lösungslängen mit SVG-Figuren-Notation inklusive Bauern
 - Rating-Schwierigkeit `easy`, `medium`, `challenging`, `hard`, `veryHard`
 - mehrere Typen in einem PDF, gruppiert oder gemischt
 - vektorbasierte Brett- und Figuren-Ausgabe
@@ -41,16 +41,23 @@ Standardpfad:
 
 Ein eigener Pfad kann beim Erzeugen mit `--db` angegeben werden.
 
-Standardmäßig sampelt das Programm pro Auswahlgruppe aus bis zu 500 passenden,
-validierten Kandidaten. Das hält Befehle wie `--type mateIn1 --count 30`
-praktisch benutzbar. Der schnelle CSV-Filter läuft vor der schachlichen
-Rekonstruktion, sodass nur potenziell passende Zeilen mit `python-chess`
-validiert werden.
+Standardmäßig sampelt das Programm pro Auswahlgruppe zufällig aus bis zu 500
+passenden, validierten Kandidaten. Das hält Befehle wie
+`--type mateIn1 --count 30` praktisch benutzbar. Der schnelle CSV-Filter läuft
+vor der schachlichen Rekonstruktion, sodass nur potenziell passende Zeilen mit
+`python-chess` validiert werden. Der verwendete Seed wird nach der PDF-Erzeugung
+ausgegeben und kann mit `--seed` erneut verwendet werden.
 
 Für einen vollständigen Reservoir-Scan über die gesamte Datenbank:
 
 ```bash
 lichess-puzzle-pdf --type mateIn1 --count 30 --candidate-limit 0
+```
+
+Reproduzierbare Auswahl:
+
+```bash
+lichess-puzzle-pdf --type fork --count 30 --seed 42 --output forks.pdf
 ```
 
 ## PDF Erzeugen

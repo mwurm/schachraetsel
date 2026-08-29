@@ -6,6 +6,7 @@ from pathlib import Path
 import chess
 import zstandard
 
+from lichess_puzzle_pdf.cli import parser
 from lichess_puzzle_pdf.config import Difficulty, PuzzleType
 from lichess_puzzle_pdf.lichess import (
     LichessPuzzleRow,
@@ -17,12 +18,11 @@ from lichess_puzzle_pdf.lichess import (
     reconstruct_puzzle,
 )
 from lichess_puzzle_pdf.notation import (
-    move_to_unicode,
+    FigurineMove,
+    move_to_figurine_move,
     san_to_german,
-    san_to_unicode,
     solution_to_german,
-    solution_to_unicode,
-    solution_to_unicode_with_sides,
+    solution_to_figurine_moves,
 )
 from lichess_puzzle_pdf.render import create_pdf, difficulty_stars, rating_metadata
 from lichess_puzzle_pdf.selection import PuzzleFilter, SelectionRequest, mixed, select_puzzles
@@ -108,6 +108,12 @@ def row(overrides: dict[str, str] | None = None) -> LichessPuzzleRow:
     data = dict(MATE_IN_1_ROW)
     data.update(overrides or {})
     return parse_row(data)
+
+
+def test_cli_seed_defaults_to_random_and_accepts_explicit_seed():
+    p = parser()
+    assert p.parse_args([]).seed is None
+    assert p.parse_args(["--seed", "42"]).seed == 42
 
 
 def test_parse_row_handles_themes_openings_and_empty_optional_fields():
@@ -279,22 +285,25 @@ def test_different_seeds_normally_pick_different_puzzles(tmp_path: Path):
 def test_german_notation():
     assert san_to_german("Nf6+") == "Sf6+"
     assert solution_to_german(("Nf6+", "Kf8", "Qh6#")) == "Sf6+ Kf8 Dh6#"
-    assert san_to_unicode("Nf6+") == "♘f6+"
-    assert solution_to_unicode(("Qf6+", "Kd7", "Qxh8", "Bb7", "Rxf8", "Rxf8", "Qxf8")) == (
-        "♕f6+ ♔d7 ♕xh8 ♗b7 ♖xf8 ♖xf8 ♕xf8"
-    )
 
 
-def test_unicode_notation_uses_side_to_move_and_pawn_symbols():
+def test_figurine_moves_use_side_to_move_and_pawns():
     fork = puzzle_from_row(parse_row(FORK_ROW))
     assert fork is not None
-    assert solution_to_unicode_with_sides(fork.starting_fen, fork.solution_moves) == (
-        "♜e1+ ♔h2 ♜xc1 ♖xc1 ♛h6+ ♔g1 ♛xc1+"
+    assert solution_to_figurine_moves(fork.starting_fen, fork.solution_moves) == (
+        FigurineMove(chess.Piece(chess.ROOK, chess.BLACK), "e1+"),
+        FigurineMove(chess.Piece(chess.KING, chess.WHITE), "h2"),
+        FigurineMove(chess.Piece(chess.ROOK, chess.BLACK), "xc1"),
+        FigurineMove(chess.Piece(chess.ROOK, chess.WHITE), "xc1"),
+        FigurineMove(chess.Piece(chess.QUEEN, chess.BLACK), "h6+"),
+        FigurineMove(chess.Piece(chess.KING, chess.WHITE), "g1"),
+        FigurineMove(chess.Piece(chess.QUEEN, chess.BLACK), "xc1+"),
     )
     board = chess.Board()
-    assert move_to_unicode(board, chess.Move.from_uci("e2e4")) == "♙e4"
-    board.push(chess.Move.from_uci("e2e4"))
-    assert move_to_unicode(board, chess.Move.from_uci("d7d5")) == "♟d5"
+    assert move_to_figurine_move(board, chess.Move.from_uci("e2e4")) == FigurineMove(
+        chess.Piece(chess.PAWN, chess.WHITE),
+        "e4",
+    )
 
 
 def test_pdf_smoke_for_mate_in_1_mate_in_2_fork_and_mixed(tmp_path: Path):

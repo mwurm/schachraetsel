@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import secrets
 import urllib.request
 
 from .config import Difficulty, PuzzleType, parse_puzzle_type
@@ -109,7 +110,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--very-hard", dest="very_hard", type=int)
     p.add_argument("--layout", choices=["grouped", "mixed"], default="grouped")
     p.add_argument("--title")
-    p.add_argument("--seed", type=int, default=20260826, help="Seed für reproduzierbare Auswahl")
+    p.add_argument("--seed", type=int, help="Seed für reproduzierbare Auswahl")
     p.add_argument(
         "--candidate-limit",
         type=int,
@@ -157,11 +158,12 @@ def main() -> None:
     try:
         requests = build_requests(args)
         candidate_limit = None if args.candidate_limit == 0 else args.candidate_limit
-        puzzles = select_puzzles(args.db, requests, args.seed, candidate_limit)
+        seed = args.seed if args.seed is not None else secrets.randbits(64)
+        puzzles = select_puzzles(args.db, requests, seed, candidate_limit)
     except (ValueError, FileNotFoundError) as exc:
         raise SystemExit(str(exc)) from exc
     if args.layout == "mixed":
-        puzzles = mixed(puzzles, args.seed)
+        puzzles = mixed(puzzles, seed)
     path = create_pdf(
         puzzles,
         args.output,
@@ -172,6 +174,7 @@ def main() -> None:
         show_move_count=args.move_count,
     )
     print(path)
+    print(f"Seed: {seed}")
 
 
 if __name__ == "__main__":

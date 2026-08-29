@@ -14,7 +14,7 @@ from reportlab.pdfgen import canvas
 from svglib.svglib import svg2rlg
 
 from .config import Difficulty, PUZZLE_TYPES
-from .notation import solution_to_unicode_with_sides
+from .notation import solution_to_figurine_moves
 from .puzzle import Puzzle
 
 MM = 72 / 25.4
@@ -34,6 +34,10 @@ SOLUTION_COLUMNS = 2
 SOLUTION_GROUPS_PER_PAGE = 3
 SOLUTION_ROW_GAP = 18 * MM
 SOLUTION_GROUP_GAP = 11 * MM
+SOLUTION_ICON_SIZE = 15.75
+SOLUTION_MOVE_GAP = 4.5
+SOLUTION_ICON_TEXT_GAP = 1.5
+SOLUTION_WRAP_GAP = 14.0
 
 
 def _register_font(name: str, paths: list[Path], fallback: str) -> str:
@@ -92,8 +96,8 @@ class PieceSet:
         renderPDF.draw(drawing, c, x + (field - w) / 2, y + (field - h) / 2 + lift)
 
 
-def _turn_symbol(turn: bool) -> str:
-    return "♔" if turn == chess.WHITE else "♚"
+def _turn_piece(turn: bool) -> chess.Piece:
+    return chess.Piece(chess.KING, chess.WHITE if turn == chess.WHITE else chess.BLACK)
 
 
 def difficulty_stars(difficulty: Difficulty | None) -> str:
@@ -119,7 +123,8 @@ def task_instruction(puzzle: Puzzle) -> str:
 
 
 def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, task_no: int,
-                       text_font: str, symbol_font: str, show_move_count: bool) -> None:
+                       text_font: str, symbol_font: str, show_move_count: bool,
+                       pieces: PieceSet) -> None:
     board = chess.Board(puzzle.starting_fen)
     stars = difficulty_stars(puzzle.difficulty)
     meta_label = rating_metadata(puzzle, show_move_count=show_move_count)
@@ -129,10 +134,8 @@ def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, tas
     c.setFont(text_font, size)
     c.drawString(x, y, prefix)
     symbol_x = x + c.stringWidth(prefix, text_font, size)
-    c.setFont(symbol_font, size)
-    symbol = _turn_symbol(board.turn)
-    c.drawString(symbol_x, y, symbol)
-    suffix_x = symbol_x + c.stringWidth(symbol, symbol_font, size)
+    pieces.draw(c, _turn_piece(board.turn), symbol_x, y - 1.7, size, 0.92, 0.0)
+    suffix_x = symbol_x + size + 1.5
     c.setFont(text_font, size)
     c.drawString(suffix_x, y, middle)
     meta_x = suffix_x + c.stringWidth(middle + " ", text_font, size)
@@ -194,12 +197,37 @@ def default_title(puzzles: list[Puzzle]) -> str:
     return "Schachtaktik"
 
 
+def _draw_solution_line(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float,
+                        max_width: float, text_font: str, pieces: PieceSet) -> None:
+    cursor_x = x
+    cursor_y = y
+    for move in solution_to_figurine_moves(puzzle.starting_fen, puzzle.solution_moves):
+        text_width = c.stringWidth(move.text, text_font, SOLUTION_FONT_SIZE)
+        move_width = SOLUTION_ICON_SIZE + SOLUTION_ICON_TEXT_GAP + text_width
+        if cursor_x > x and cursor_x + move_width > x + max_width:
+            cursor_x = x
+            cursor_y -= SOLUTION_WRAP_GAP
+        pieces.draw(
+            c,
+            move.piece,
+            cursor_x,
+            cursor_y - 2.0,
+            SOLUTION_ICON_SIZE,
+            0.92,
+            0.0,
+        )
+        c.setFont(text_font, SOLUTION_FONT_SIZE)
+        c.drawString(cursor_x + SOLUTION_ICON_SIZE + SOLUTION_ICON_TEXT_GAP, cursor_y, move.text)
+        cursor_x += move_width + SOLUTION_MOVE_GAP
+
+
 def _draw_solution_pages(c: canvas.Canvas, puzzles: list[Puzzle], text_font: str,
-                         text_font_bold: str, symbol_font: str) -> None:
+                         text_font_bold: str, pieces: PieceSet) -> None:
     width, _ = A4
     per_solution_page = SOLUTION_ROWS_PER_GROUP * SOLUTION_COLUMNS * SOLUTION_GROUPS_PER_PAGE
     column_x = [PAGE_MARGIN, width / 2 + 4 * MM]
     number_gap = 10 * MM
+    solution_width = width / 2 - PAGE_MARGIN - number_gap - 6 * MM
     first_row_y = 255 * MM
 
     for page_start in range(0, len(puzzles), per_solution_page):
@@ -223,11 +251,14 @@ def _draw_solution_pages(c: canvas.Canvas, puzzles: list[Puzzle], text_font: str
 
             c.setFont(text_font_bold, SOLUTION_FONT_SIZE)
             c.drawString(x, y, f"{task_no}.")
-            c.setFont(symbol_font, SOLUTION_FONT_SIZE)
-            c.drawString(
+            _draw_solution_line(
+                c,
+                puzzle,
                 x + number_gap,
                 y,
-                solution_to_unicode_with_sides(puzzle.starting_fen, puzzle.solution_moves),
+                solution_width,
+                text_font,
+                pieces,
             )
 
         groups_on_page = (len(page_items) + SOLUTION_ROWS_PER_GROUP * SOLUTION_COLUMNS - 1) // (
@@ -293,6 +324,7 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None =
                 text_font,
                 symbol_font,
                 show_move_count,
+                pieces,
             )
             _draw_board(
                 c,
@@ -312,6 +344,6 @@ def create_pdf(puzzles: list[Puzzle], output: str | Path, *, title: str | None =
         c.drawCentredString(width / 2, PAGE_MARGIN, f"Seite {page_start // per_page + 1}")
         c.showPage()
 
-    _draw_solution_pages(c, puzzles, text_font, text_font_bold, symbol_font)
+    _draw_solution_pages(c, puzzles, text_font, text_font_bold, pieces)
     c.save()
     return output
