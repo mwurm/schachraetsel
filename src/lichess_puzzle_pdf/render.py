@@ -28,6 +28,7 @@ TASK_HEADING_TOP = 263 * MM
 TASK_HEADING_BOARD_GAP = 5 * MM
 TASK_ROW_GAP = 8 * MM
 COORD_FONT_SIZE = 8.25
+TASK_HEADING_FONT_SIZE = 8.75
 SOLUTION_FONT_SIZE = 12
 SOLUTION_ROWS_PER_GROUP = 3
 SOLUTION_COLUMNS = 2
@@ -130,7 +131,7 @@ def _draw_task_heading(c: canvas.Canvas, x: float, y: float, puzzle: Puzzle, tas
     meta_label = rating_metadata(puzzle, show_move_count=show_move_count)
     prefix = f"Nr. {task_no} "
     middle = f" - {task_instruction(puzzle)}"
-    size = 10
+    size = TASK_HEADING_FONT_SIZE
     c.setFont(text_font, size)
     c.drawString(x, y, prefix)
     symbol_x = x + c.stringWidth(prefix, text_font, size)
@@ -190,11 +191,11 @@ def _draw_board(c: canvas.Canvas, board: chess.Board, x: float, y: float, board_
 
 def default_title(puzzles: list[Puzzle]) -> str:
     if not puzzles:
-        return "Schachtaktik"
+        return "Schachrätsel"
     types = {puzzle.primary_type for puzzle in puzzles}
     if len(types) == 1:
         return PUZZLE_TYPES[next(iter(types))].german_name
-    return "Schachtaktik"
+    return "Schachrätsel"
 
 
 def _draw_solution_line(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float,

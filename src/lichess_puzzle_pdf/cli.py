@@ -91,6 +91,12 @@ def build_requests(args: argparse.Namespace) -> list[SelectionRequest]:
     ]
 
 
+def output_path_or_random(output: Path | None, puzzle_count: int) -> Path:
+    if output is not None:
+        return output
+    return Path(f"lichess-puzzles-{secrets.token_hex(4)}-{puzzle_count}.pdf")
+
+
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Erzeuge deutsche A4-PDFs aus der Lichess Puzzle Database.")
     sub = p.add_subparsers(dest="command")
@@ -98,7 +104,7 @@ def parser() -> argparse.ArgumentParser:
     download.add_argument("--output", type=Path, default=DEFAULT_DB_PATH)
     download.add_argument("--url", default=PUZZLE_DB_URL)
 
-    p.add_argument("-o", "--output", type=Path, default=Path("lichess_puzzles.pdf"))
+    p.add_argument("-o", "--output", type=Path)
     p.add_argument("--db", type=Path, default=DEFAULT_DB_PATH, help="Pfad zur lichess_db_puzzle.csv.zst")
     p.add_argument("-n", "--count", type=int, default=30)
     p.add_argument("--type", action="append", help="Primärer Lichess-Typ, mehrfach oder kommasepariert")
@@ -166,7 +172,7 @@ def main() -> None:
         puzzles = mixed(puzzles, seed)
     path = create_pdf(
         puzzles,
-        args.output,
+        output_path_or_random(args.output, len(puzzles)),
         title=args.title,
         gray=args.gray,
         piece_scale=args.piece_scale,

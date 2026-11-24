@@ -66,6 +66,9 @@ lichess-puzzle-pdf --type fork --count 30 --seed 42 --output forks.pdf
 lichess-puzzle-pdf --type mateIn1 --count 30 --output mate-in-1.pdf
 ```
 
+Ohne `--output` wird ein zufälliger Dateiname mit der Rätselanzahl am Ende
+erzeugt, z. B. `lichess-puzzles-a1b2c3d4-30.pdf`.
+
 Mehrere Typen:
 
 ```bash

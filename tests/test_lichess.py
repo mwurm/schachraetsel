@@ -6,7 +6,7 @@ from pathlib import Path
 import chess
 import zstandard
 
-from lichess_puzzle_pdf.cli import parser
+from lichess_puzzle_pdf.cli import output_path_or_random, parser
 from lichess_puzzle_pdf.config import Difficulty, PuzzleType
 from lichess_puzzle_pdf.lichess import (
     LichessPuzzleRow,
@@ -24,7 +24,7 @@ from lichess_puzzle_pdf.notation import (
     solution_to_german,
     solution_to_figurine_moves,
 )
-from lichess_puzzle_pdf.render import create_pdf, difficulty_stars, rating_metadata
+from lichess_puzzle_pdf.render import create_pdf, default_title, difficulty_stars, rating_metadata
 from lichess_puzzle_pdf.selection import PuzzleFilter, SelectionRequest, mixed, select_puzzles
 
 
@@ -116,6 +116,18 @@ def test_cli_seed_defaults_to_random_and_accepts_explicit_seed():
     assert p.parse_args(["--seed", "42"]).seed == 42
 
 
+def test_cli_output_defaults_to_random_name_and_accepts_explicit_path():
+    p = parser()
+    assert p.parse_args([]).output is None
+    assert p.parse_args(["--output", "training.pdf"]).output == Path("training.pdf")
+
+    generated = output_path_or_random(None, 12)
+    assert generated.parent == Path(".")
+    assert generated.name.startswith("lichess-puzzles-")
+    assert generated.name.endswith("-12.pdf")
+    assert output_path_or_random(Path("fixed.pdf"), 12) == Path("fixed.pdf")
+
+
 def test_parse_row_handles_themes_openings_and_empty_optional_fields():
     parsed = parse_row({**PIN_ROW, "GameUrl": "", "OpeningTags": ""})
     assert parsed.themes == frozenset({"advantage", "pin", "middlegame", "veryLong"})
@@ -185,6 +197,15 @@ def test_rating_metadata_includes_optional_move_count():
     assert rating_metadata(mate) == "(740, 1 Zug)"
     assert rating_metadata(fork) == "(1380, 7 Züge)"
     assert rating_metadata(fork, show_move_count=False) == "(1380)"
+
+
+def test_default_title_for_empty_and_mixed_puzzles():
+    mate = puzzle_from_row(parse_row(MATE_IN_1_ROW))
+    fork = puzzle_from_row(parse_row(FORK_ROW))
+    assert mate is not None
+    assert fork is not None
+    assert default_title([]) == "Schachrätsel"
+    assert default_title([mate, fork]) == "Schachrätsel"
 
 
 def test_mate_in_1_requires_exactly_one_matching_mate():
