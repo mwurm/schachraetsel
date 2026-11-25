@@ -107,7 +107,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("-o", "--output", type=Path)
     p.add_argument("--db", type=Path, default=DEFAULT_DB_PATH, help="Pfad zur lichess_db_puzzle.csv.zst")
     p.add_argument("-n", "--count", type=int, default=30)
-    p.add_argument("--type", action="append", help="Primärer Lichess-Typ, mehrfach oder kommasepariert")
+    p.add_argument("--type", action="append", help="Lichess-Theme, mehrfach oder kommasepariert (ODER-Verknüpfung)")
     p.add_argument("--puzzles", action="append", nargs="+", help="Verteilung, z.B. mateIn1=10 fork=10")
     p.add_argument("--easy", type=int)
     p.add_argument("--medium", type=int)

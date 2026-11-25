@@ -89,6 +89,25 @@ lichess-puzzle-pdf \
   --output training.pdf
 ```
 
+Mattmuster gezielt auswählen:
+
+```bash
+lichess-puzzle-pdf \
+  --puzzles anastasiaMate=10 arabianMate=10 backRankMate=10 \
+  --rating-min 600 --rating-max 899 \
+  --layout grouped \
+  --output mattmuster.pdf
+```
+
+`--type` und `--puzzles` berücksichtigen alle Themes eines Rätsels. Ein Rätsel
+mit `mateIn2` und `anastasiaMate` ist daher auch über `anastasiaMate` auswählbar.
+Die Aufgabenüberschrift verwendet den angeforderten Typ. Mehrere `--type`-Werte
+sind ODER-verknüpft; `--theme` verlangt zusätzliche Themes.
+
+Bei `--puzzles` gelten die dort angegebenen Stückzahlen; Schwierigkeitsanzahlen
+wie `--easy` werden in dieser Kombination nicht berücksichtigt. Für eine
+Rating-Einschränkung zusätzlich `--rating-min` und `--rating-max` verwenden.
+
 Nach Schwierigkeit:
 
 ```bash
@@ -122,15 +141,33 @@ lichess-puzzle-pdf \
 ## Unterstützte Themes
 
 Die Theme-Namen entsprechen den sichtbaren Lichess-Puzzle-Themes aus dem
-offiziellen Lichess-Code und der Lichess Puzzle Database.
+offiziellen Lichess-Code und der Lichess Puzzle Database. Alle 19 Mattmuster
+der [Lichess-Themenseite](https://lichess.org/training/themes) werden unterstützt.
 
 | Lichess Theme | Deutsch |
 | --- | --- |
 | mateIn1 | Matt in 1 |
 | mateIn2 | Matt in 2 |
 | mateIn3 | Matt in 3 |
+| anastasiaMate | Anastasia-Matt |
+| arabianMate | Arabisches Matt |
 | smotheredMate | Ersticktes Matt |
 | backRankMate | Grundreihenmatt |
+| balestraMate | Balestra-Matt |
+| blindSwineMate | Blind-Swine-Matt |
+| bodenMate | Boden-Matt |
+| cornerMate | Eckmatt |
+| doubleBishopMate | Doppelläufermatt |
+| dovetailMate | Dovetail-Matt |
+| epauletteMate | Epaulettenmatt |
+| hookMate | Hakenmatt |
+| killBoxMate | Kill-Box-Matt |
+| pillsburysMate | Pillsbury-Matt |
+| morphysMate | Morphy-Matt |
+| operaMate | Opernmatt |
+| swallowstailMate | Schwalbenschwanzmatt |
+| triangleMate | Dreiecksmatt |
+| vukovicMate | Vuković-Matt |
 | fork | Gabel |
 | skewer | Spieß |
 | pin | Fesselung |

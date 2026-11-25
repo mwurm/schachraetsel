@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 import random
 from pathlib import Path
 from typing import Iterable
@@ -23,8 +23,7 @@ class PuzzleFilter:
     difficulty: Difficulty | None = None
 
     def matches_row(self, row: LichessPuzzleRow) -> bool:
-        primary_type = primary_type_for(row.themes)
-        if self.types and primary_type not in self.types:
+        if self.types and not self.types.intersection(row.themes):
             return False
         if self.required_themes and not self.required_themes.issubset(row.themes):
             return False
@@ -43,7 +42,7 @@ class PuzzleFilter:
         return True
 
     def matches(self, puzzle: Puzzle) -> bool:
-        if self.types and puzzle.primary_type not in self.types:
+        if self.types and not self.types.intersection(puzzle.themes):
             return False
         if self.required_themes and not self.required_themes.issubset(puzzle.themes):
             return False
@@ -130,16 +129,23 @@ def select_puzzles(db_path: Path, requests: list[SelectionRequest], seed: int,
                 continue
             if puzzle.puzzle_id in seen_in_reservoir[request.name]:
                 continue
+            # Use the requested theme for the PDF heading, even when another
+            # theme has higher global priority (e.g. mateIn2 + anastasiaMate).
+            selected_puzzle = puzzle
+            if request.filter.types:
+                requested_type = primary_type_for(puzzle.themes.intersection(request.filter.types))
+                if requested_type is not None:
+                    selected_puzzle = replace(puzzle, primary_type=requested_type)
             matched_counts[request.name] += 1
             reservoir = reservoirs[request.name]
             if len(reservoir) < request.count:
-                reservoir.append(puzzle)
+                reservoir.append(selected_puzzle)
                 seen_in_reservoir[request.name].add(puzzle.puzzle_id)
             else:
                 index = rng.randrange(matched_counts[request.name])
                 if index < request.count:
                     seen_in_reservoir[request.name].discard(reservoir[index].puzzle_id)
-                    reservoir[index] = puzzle
+                    reservoir[index] = selected_puzzle
                     seen_in_reservoir[request.name].add(puzzle.puzzle_id)
         if enough_candidates_seen():
             break

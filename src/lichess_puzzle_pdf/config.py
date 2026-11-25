@@ -18,8 +18,25 @@ class PuzzleType(str, Enum):
     ATTRACTION = "attraction"
     CLEARANCE = "clearance"
     INTERFERENCE = "interference"
+    MATE_ANASTASIA = "anastasiaMate"
+    MATE_ARABIAN = "arabianMate"
     BACK_RANK_MATE = "backRankMate"
     SMOTHERED_MATE = "smotheredMate"
+    BALESTRA_MATE = "balestraMate"
+    BLIND_SWINE_MATE = "blindSwineMate"
+    BODEN_MATE = "bodenMate"
+    CORNER_MATE = "cornerMate"
+    DOUBLE_BISHOP_MATE = "doubleBishopMate"
+    DOVETAIL_MATE = "dovetailMate"
+    EPAULETTE_MATE = "epauletteMate"
+    HOOK_MATE = "hookMate"
+    KILL_BOX_MATE = "killBoxMate"
+    PILLSBURYS_MATE = "pillsburysMate"
+    MORPHYS_MATE = "morphysMate"
+    OPERA_MATE = "operaMate"
+    SWALLOWS_TAIL_MATE = "swallowstailMate"
+    TRIANGLE_MATE = "triangleMate"
+    VUKOVIC_MATE = "vukovicMate"
     PROMOTION = "promotion"
     UNDER_PROMOTION = "underPromotion"
     EN_PASSANT = "enPassant"
@@ -68,24 +85,41 @@ PUZZLE_TYPES: dict[PuzzleType, PuzzleTypeConfig] = {
     PuzzleType.MATE_IN_1: PuzzleTypeConfig("mateIn1", "Matt in 1", "Matt in 1", 10),
     PuzzleType.MATE_IN_2: PuzzleTypeConfig("mateIn2", "Matt in 2", "Matt in 2", 11),
     PuzzleType.MATE_IN_3: PuzzleTypeConfig("mateIn3", "Matt in 3", "Matt in 3", 12),
+    PuzzleType.MATE_ANASTASIA: PuzzleTypeConfig("anastasiaMate", "Anastasia-Matt", "Finde das Anastasia-Matt", 18),
+    PuzzleType.MATE_ARABIAN: PuzzleTypeConfig("arabianMate", "Arabisches Matt", "Finde das arabische Matt", 19),
     PuzzleType.SMOTHERED_MATE: PuzzleTypeConfig("smotheredMate", "Ersticktes Matt", "Finde das erstickte Matt", 20),
     PuzzleType.BACK_RANK_MATE: PuzzleTypeConfig("backRankMate", "Grundreihenmatt", "Finde das Grundreihenmatt", 21),
-    PuzzleType.FORK: PuzzleTypeConfig("fork", "Gabel", "Finde die Gabel", 30),
-    PuzzleType.SKEWER: PuzzleTypeConfig("skewer", "Spieß", "Finde den Spieß", 31),
-    PuzzleType.PIN: PuzzleTypeConfig("pin", "Fesselung", "Finde die Fesselung", 32),
-    PuzzleType.DISCOVERED_ATTACK: PuzzleTypeConfig("discoveredAttack", "Abzugsangriff", "Finde den Abzugsangriff", 33),
-    PuzzleType.DOUBLE_CHECK: PuzzleTypeConfig("doubleCheck", "Doppelschach", "Finde das Doppelschach", 34),
-    PuzzleType.SACRIFICE: PuzzleTypeConfig("sacrifice", "Opfer", "Finde das Opfer", 40),
-    PuzzleType.DEFLECTION: PuzzleTypeConfig("deflection", "Ablenkung", "Finde die Ablenkung", 41),
-    PuzzleType.ATTRACTION: PuzzleTypeConfig("attraction", "Hinlenkung", "Finde die Hinlenkung", 42),
-    PuzzleType.CLEARANCE: PuzzleTypeConfig("clearance", "Linienräumung", "Finde die Linienräumung", 43),
-    PuzzleType.INTERFERENCE: PuzzleTypeConfig("interference", "Unterbrechung", "Finde die Unterbrechung", 44),
-    PuzzleType.PROMOTION: PuzzleTypeConfig("promotion", "Umwandlung", "Finde die Umwandlung", 50),
-    PuzzleType.UNDER_PROMOTION: PuzzleTypeConfig("underPromotion", "Unterverwandlung", "Finde die Unterverwandlung", 51),
-    PuzzleType.EN_PASSANT: PuzzleTypeConfig("enPassant", "En passant", "Finde en passant", 52),
-    PuzzleType.ENDGAME: PuzzleTypeConfig("endgame", "Endspiel", "Finde den besten Endspielzug", 60),
-    PuzzleType.MIDDLEGAME: PuzzleTypeConfig("middlegame", "Mittelspiel", "Finde den besten Mittelspielzug", 61),
-    PuzzleType.OPENING: PuzzleTypeConfig("opening", "Eröffnung", "Finde den besten Eröffnungszug", 62),
+    PuzzleType.BALESTRA_MATE: PuzzleTypeConfig("balestraMate", "Balestra-Matt", "Finde das Balestra-Matt", 22),
+    PuzzleType.BLIND_SWINE_MATE: PuzzleTypeConfig("blindSwineMate", "Blind-Swine-Matt", "Finde das Blind-Swine-Matt", 23),
+    PuzzleType.BODEN_MATE: PuzzleTypeConfig("bodenMate", "Boden-Matt", "Finde das Boden-Matt", 24),
+    PuzzleType.CORNER_MATE: PuzzleTypeConfig("cornerMate", "Eckmatt", "Finde das Eckmatt", 25),
+    PuzzleType.DOUBLE_BISHOP_MATE: PuzzleTypeConfig("doubleBishopMate", "Doppelläufermatt", "Finde das Doppelläufermatt", 26),
+    PuzzleType.DOVETAIL_MATE: PuzzleTypeConfig("dovetailMate", "Dovetail-Matt", "Finde das Dovetail-Matt", 27),
+    PuzzleType.EPAULETTE_MATE: PuzzleTypeConfig("epauletteMate", "Epaulettenmatt", "Finde das Epaulettenmatt", 28),
+    PuzzleType.HOOK_MATE: PuzzleTypeConfig("hookMate", "Hakenmatt", "Finde das Hakenmatt", 29),
+    PuzzleType.KILL_BOX_MATE: PuzzleTypeConfig("killBoxMate", "Kill-Box-Matt", "Finde das Kill-Box-Matt", 30),
+    PuzzleType.PILLSBURYS_MATE: PuzzleTypeConfig("pillsburysMate", "Pillsbury-Matt", "Finde das Pillsbury-Matt", 31),
+    PuzzleType.MORPHYS_MATE: PuzzleTypeConfig("morphysMate", "Morphy-Matt", "Finde das Morphy-Matt", 32),
+    PuzzleType.OPERA_MATE: PuzzleTypeConfig("operaMate", "Opernmatt", "Finde das Opernmatt", 33),
+    PuzzleType.SWALLOWS_TAIL_MATE: PuzzleTypeConfig("swallowstailMate", "Schwalbenschwanzmatt", "Finde das Schwalbenschwanzmatt", 34),
+    PuzzleType.TRIANGLE_MATE: PuzzleTypeConfig("triangleMate", "Dreiecksmatt", "Finde das Dreiecksmatt", 35),
+    PuzzleType.VUKOVIC_MATE: PuzzleTypeConfig("vukovicMate", "Vuković-Matt", "Finde das Vuković-Matt", 36),
+    PuzzleType.FORK: PuzzleTypeConfig("fork", "Gabel", "Finde die Gabel", 40),
+    PuzzleType.SKEWER: PuzzleTypeConfig("skewer", "Spieß", "Finde den Spieß", 41),
+    PuzzleType.PIN: PuzzleTypeConfig("pin", "Fesselung", "Finde die Fesselung", 42),
+    PuzzleType.DISCOVERED_ATTACK: PuzzleTypeConfig("discoveredAttack", "Abzugsangriff", "Finde den Abzugsangriff", 43),
+    PuzzleType.DOUBLE_CHECK: PuzzleTypeConfig("doubleCheck", "Doppelschach", "Finde das Doppelschach", 44),
+    PuzzleType.SACRIFICE: PuzzleTypeConfig("sacrifice", "Opfer", "Finde das Opfer", 50),
+    PuzzleType.DEFLECTION: PuzzleTypeConfig("deflection", "Ablenkung", "Finde die Ablenkung", 51),
+    PuzzleType.ATTRACTION: PuzzleTypeConfig("attraction", "Hinlenkung", "Finde die Hinlenkung", 52),
+    PuzzleType.CLEARANCE: PuzzleTypeConfig("clearance", "Linienräumung", "Finde die Linienräumung", 53),
+    PuzzleType.INTERFERENCE: PuzzleTypeConfig("interference", "Unterbrechung", "Finde die Unterbrechung", 54),
+    PuzzleType.PROMOTION: PuzzleTypeConfig("promotion", "Umwandlung", "Finde die Umwandlung", 60),
+    PuzzleType.UNDER_PROMOTION: PuzzleTypeConfig("underPromotion", "Unterverwandlung", "Finde die Unterverwandlung", 61),
+    PuzzleType.EN_PASSANT: PuzzleTypeConfig("enPassant", "En passant", "Finde en passant", 62),
+    PuzzleType.ENDGAME: PuzzleTypeConfig("endgame", "Endspiel", "Finde den besten Endspielzug", 70),
+    PuzzleType.MIDDLEGAME: PuzzleTypeConfig("middlegame", "Mittelspiel", "Finde den besten Mittelspielzug", 71),
+    PuzzleType.OPENING: PuzzleTypeConfig("opening", "Eröffnung", "Finde den besten Eröffnungszug", 72),
 }
 
 

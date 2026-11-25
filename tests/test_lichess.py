@@ -1,13 +1,15 @@
 from __future__ import annotations
 
 import csv
+import json
 from pathlib import Path
 
 import chess
+import pytest
 import zstandard
 
-from lichess_puzzle_pdf.cli import output_path_or_random, parser
-from lichess_puzzle_pdf.config import Difficulty, PuzzleType
+from lichess_puzzle_pdf.cli import build_requests, output_path_or_random, parser
+from lichess_puzzle_pdf.config import Difficulty, PUZZLE_TYPES, PuzzleType
 from lichess_puzzle_pdf.lichess import (
     LichessPuzzleRow,
     count_mate_in_one_moves,
@@ -147,6 +149,80 @@ def test_reconstruct_applies_first_move_and_keeps_remaining_solution():
 def test_primary_type_uses_priority_and_unknown_theme_is_ignored():
     assert primary_type_for(frozenset({"mateIn2", "sacrifice", "endgame"})) == PuzzleType.MATE_IN_2
     assert primary_type_for(frozenset({"unknownTheme"})) is None
+
+
+def test_all_puzzle_types_have_configuration():
+    assert set(PUZZLE_TYPES) == set(PuzzleType)
+
+
+# Unmodified positions, moves and metadata from the official local CSV export.
+MATE_PATTERN_ROWS = json.loads(
+    (Path(__file__).parent / "fixtures" / "lichess_mate_patterns.json").read_text(encoding="utf-8")
+)
+
+
+def test_mate_pattern_fixtures_cover_all_supported_patterns():
+    assert len(MATE_PATTERN_ROWS) == 19
+    assert set(MATE_PATTERN_ROWS) == {t.value for t in PuzzleType if t.value.endswith("Mate")}
+
+
+@pytest.mark.parametrize("theme", sorted(MATE_PATTERN_ROWS))
+def test_select_each_official_mate_pattern(tmp_path: Path, theme):
+    db = write_db(tmp_path / "mate-pattern.csv.zst", [MATE_PATTERN_ROWS[theme]])
+    for arguments in (["--type", theme, "--count", "1"], ["--puzzles", f"{theme}=1"]):
+        requests = build_requests(parser().parse_args(arguments))
+        selected = select_puzzles(db, requests, seed=42)
+        assert len(selected) == 1
+        puzzle = selected[0]
+        assert puzzle.puzzle_id == MATE_PATTERN_ROWS[theme]["PuzzleId"]
+        assert puzzle.primary_type == PuzzleType(theme)
+        assert theme in puzzle.themes
+        assert default_title(selected) == PUZZLE_TYPES[PuzzleType(theme)].german_name
+        board = chess.Board(puzzle.starting_fen)
+        for move in puzzle.solution_moves:
+            assert move in board.legal_moves
+            board.push(move)
+        assert board.is_checkmate()
+
+
+@pytest.mark.parametrize("puzzle_id,fen,moves,themes,requested_type", [
+    # Original rows from the official Lichess database, also tagged mateIn1/2.
+    ("01J5O", "r4r1k/1pp1NppR/3p4/p3n3/4P3/1PPP2P1/1P1K2P1/3R4 b - - 0 22",
+     "h8h7 d1h1", "mateIn1 mate anastasiaMate oneMove endgame", PuzzleType.MATE_ANASTASIA),
+    ("00H8a", "5bk1/2R4p/6p1/8/2b1NP1P/4P1K1/r7/8 b - - 2 45",
+     "c4d3 e4f6 g8h8 c7h7", "mate endgame arabianMate short mateIn2", PuzzleType.MATE_ARABIAN),
+])
+def test_select_mating_pattern_despite_higher_priority_mate_theme(
+    tmp_path: Path, puzzle_id, fen, moves, themes, requested_type,
+):
+    data = {**MATE_IN_1_ROW, "PuzzleId": puzzle_id, "FEN": fen, "Moves": moves, "Themes": themes}
+    parsed = parse_row(data)
+    puzzle = puzzle_from_row(parsed)
+    assert puzzle is not None
+    assert puzzle.primary_type != requested_type
+    pattern_filter = PuzzleFilter(types=frozenset({requested_type}))
+    assert pattern_filter.matches_row(parsed)
+    assert pattern_filter.matches(puzzle)
+    assert not PuzzleFilter(
+        types=frozenset({requested_type}), excluded_themes=frozenset({"endgame"}),
+    ).matches(puzzle)
+    db = write_db(tmp_path / "patterns.csv.zst", [data])
+    for arguments in (["--type", requested_type.value, "--count", "1"],
+                      ["--puzzles", f"{requested_type.value}=1"]):
+        selected = select_puzzles(db, build_requests(parser().parse_args(arguments)), seed=42)
+        assert len(selected) == 1
+        assert selected[0].puzzle_id == puzzle_id
+        assert selected[0].primary_type == requested_type
+        assert default_title(selected) == PUZZLE_TYPES[requested_type].german_name
+
+
+def test_type_filter_matches_any_requested_theme():
+    parsed = parse_row(FORK_ROW)
+    puzzle = puzzle_from_row(parsed)
+    assert puzzle is not None
+    theme_filter = PuzzleFilter(types=frozenset({PuzzleType.PIN, PuzzleType.SACRIFICE}))
+    assert theme_filter.matches_row(parsed)
+    assert theme_filter.matches(puzzle)
 
 
 def test_filter_type_theme_and_exclude_theme():
