@@ -426,6 +426,56 @@ def test_pdf_smoke_for_multiple_solution_pages(tmp_path: Path):
     assert out.stat().st_size > 10_000
 
 
+def test_pdf_solution_links_use_puzzle_ids_and_continue_across_pages(tmp_path: Path, monkeypatch):
+    from reportlab.pdfgen import canvas
+
+    annotations = []
+    original_link = canvas.Canvas.linkURL
+
+    def capture_link(self, url, rect, **kwargs):
+        annotations.append((url, rect, self.getPageNumber()))
+        return original_link(self, url, rect, **kwargs)
+
+    monkeypatch.setattr(canvas.Canvas, "linkURL", capture_link)
+    puzzles = [
+        puzzle_from_row(parse_row({**FORK_ROW, "PuzzleId": f"p{i:04d}"}))
+        for i in range(20)
+    ]
+    assert all(puzzles)
+    output = create_pdf(puzzles, tmp_path / "links.pdf")
+    assert [url for url, _, _ in annotations] == [
+        f"https://lichess.org/training/p{i:04d}" for i in range(20)
+    ]
+    # Four puzzle pages, followed by two solution pages. No links on boards.
+    assert [page for _, _, page in annotations] == [5] * 18 + [6] * 2
+    assert all(0 < rect[0] < rect[2] < 595.3 for _, rect, _ in annotations)
+    assert output.read_bytes().count(b"/Subtype /Link") == 20
+
+
+def test_solution_number_is_drawn_once_at_start_as_link():
+    import io
+    from reportlab.pdfgen import canvas
+    from lichess_puzzle_pdf.render import PieceSet, _draw_solution_pages, PAGE_MARGIN
+
+    puzzle = puzzle_from_row(parse_row(MATE_IN_2_ROW))
+    assert puzzle is not None
+    c = canvas.Canvas(io.BytesIO(), pageCompression=0)
+    texts = []
+    original_draw = c.drawString
+
+    def capture_text(x, y, text):
+        texts.append((x, y, text))
+        original_draw(x, y, text)
+
+    c.drawString = capture_text
+    _draw_solution_pages(c, [puzzle], "Helvetica", "Helvetica-Bold", PieceSet())
+    numbers = [(x, y, text) for x, y, text in texts if text == "1."]
+    assert len(numbers) == 1
+    assert numbers[0][0] == PAGE_MARGIN
+    assert texts.index(numbers[0]) < next(i for i, (_, _, text) in enumerate(texts) if text == "e6+")
+    assert not any("https://" in text for _, _, text in texts)
+
+
 def test_mixed_layout_is_seeded():
     puzzles = [puzzle_from_row(parse_row({**MATE_IN_1_ROW, "PuzzleId": f"m{i}"})) for i in range(6)]
     valid = [p for p in puzzles if p is not None]

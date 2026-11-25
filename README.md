@@ -203,6 +203,8 @@ Sternen, standardmäßig gefolgt von der Anzahl der nötigen Lösungszüge.
 
 Die Lösungsseiten zeigen zwei Lösungen pro Zeile. Nach jeweils drei Zeilen
 trennt eine Linie die nächste Sechsergruppe passend zu einer Aufgabenseite.
+Am Anfang jeder Lösung steht die Aufgabennummer (`1.`, `2.`, …) als blauer, unterstrichener
+Link zum zugehörigen Lichess-Puzzle. Die URL wird nicht als Text angezeigt.
 
 ## Lichess-Rekonstruktion
 

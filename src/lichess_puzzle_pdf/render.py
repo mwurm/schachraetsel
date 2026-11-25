@@ -202,7 +202,8 @@ def _draw_solution_line(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float,
                         max_width: float, text_font: str, pieces: PieceSet) -> None:
     cursor_x = x
     cursor_y = y
-    for move in solution_to_figurine_moves(puzzle.starting_fen, puzzle.solution_moves):
+    moves = solution_to_figurine_moves(puzzle.starting_fen, puzzle.solution_moves)
+    for move in moves:
         text_width = c.stringWidth(move.text, text_font, SOLUTION_FONT_SIZE)
         move_width = SOLUTION_ICON_SIZE + SOLUTION_ICON_TEXT_GAP + text_width
         if cursor_x > x and cursor_x + move_width > x + max_width:
@@ -220,6 +221,26 @@ def _draw_solution_line(c: canvas.Canvas, puzzle: Puzzle, x: float, y: float,
         c.setFont(text_font, SOLUTION_FONT_SIZE)
         c.drawString(cursor_x + SOLUTION_ICON_SIZE + SOLUTION_ICON_TEXT_GAP, cursor_y, move.text)
         cursor_x += move_width + SOLUTION_MOVE_GAP
+
+
+def _draw_solution_number(c: canvas.Canvas, puzzle: Puzzle, task_no: int,
+                          x: float, y: float, text_font: str) -> None:
+    link_text = f"{task_no}."
+    link_width = c.stringWidth(link_text, text_font, SOLUTION_FONT_SIZE)
+    c.saveState()
+    c.setFont(text_font, SOLUTION_FONT_SIZE)
+    c.setFillColorRGB(0, 0.2, 0.55)
+    c.setStrokeColorRGB(0, 0.2, 0.55)
+    c.drawString(x, y, link_text)
+    c.setLineWidth(0.5)
+    c.line(x, y - 1.5, x + link_width, y - 1.5)
+    c.restoreState()
+    c.linkURL(
+        f"https://lichess.org/training/{puzzle.puzzle_id}",
+        (x, y - 2, x + link_width, y + SOLUTION_FONT_SIZE),
+        relative=0,
+        thickness=0,
+    )
 
 
 def _draw_solution_pages(c: canvas.Canvas, puzzles: list[Puzzle], text_font: str,
@@ -250,8 +271,7 @@ def _draw_solution_pages(c: canvas.Canvas, puzzles: list[Puzzle], text_font: str
             ) - row * SOLUTION_ROW_GAP
             task_no = page_start + local + 1
 
-            c.setFont(text_font_bold, SOLUTION_FONT_SIZE)
-            c.drawString(x, y, f"{task_no}.")
+            _draw_solution_number(c, puzzle, task_no, x, y, text_font_bold)
             _draw_solution_line(
                 c,
                 puzzle,
